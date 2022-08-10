@@ -67,7 +67,7 @@ Get a copy of the Biblio code into BaseX's "webapp" folder. Either `svn checkout
 
 Run the Biblio database-maker XQuery and save the resulting command script locally. For example, when BaseX is running as a server at "http://localhost:8081":
 
-    curl -u admin "http://localhost:8081/basex/rest?run=biblio/scripts/dbmaker_biblio-all.xq&dhq-svn-dir-path=../cocoon/dhq&biblio-dir-path=biblio/data" > ./biblio-setup.bxs ; echo ''
+    curl -u admin "http://localhost:8081/basex/rest?run=biblio/scripts/dbmaker_biblio-all.xq&dhq-journal-path=../cocoon/dhq&biblio-dir-path=biblio/data" > ./biblio-setup.bxs ; echo ''
 
 The result of the DB-maker script is a command script, which will set up the BaseX databases that Biblio will use. Tell BaseX to execute the new script, and then check if the Biblio databases were created. For example:
 

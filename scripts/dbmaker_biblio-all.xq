@@ -12,7 +12,7 @@ xquery version "3.1";
   
   To run this script with the BaseX Client, change to the BaseX directory in your
   terminal and run:
-     basexclient -b"dhq-svn-dir-path=/PATH/TO/dhq" -b"biblio-dir-path=/PATH/TO/data/" \
+     basexclient -b"dhq-journal-path=/PATH/TO/dhq" -b"biblio-dir-path=/PATH/TO/data/" \
                   -o"biblio-setup.bxs" "/PATH/TO/scripts/dbmaker_biblio-all.xq"
   
   To run the command script, you can then use:
@@ -25,14 +25,14 @@ xquery version "3.1";
 (:  VARIABLES  :)
 
   (: REQUIRED. An absolute file path to the directory where DHQ lives. :)
-  declare variable $dhq-svn-dir-path external;
+  declare variable $dhq-journal-path external;
   
   (: OPTIONAL. The name of the database which will hold the Subversion <BiblioSet> 
     serializations for ingestion into the 'biblio-public' database. :)
   declare variable $svnbiblio-db-name external := 'biblio-all';
   
   (: OPTIONAL. An absolute file path to the directory containing DHQ articles. :)
-  declare variable $article-dir-path external := $dhq-svn-dir-path || "/articles";
+  declare variable $article-dir-path external := $dhq-journal-path || "/articles";
   (: A map of the BaseX options specific to the DHQ article database. :)
   declare variable $article-index-opts := map {
     'attrinclude':  "*:id,*:key,*:ref,*:target,*:when",
@@ -44,7 +44,7 @@ xquery version "3.1";
   };
   
   (: OPTIONAL. An absolute file path to the directory containing Biblio data. :)
-  declare variable $biblio-dir-path external := $dhq-svn-dir-path || "/biblio/DHQ-Biblio-v3/data";
+  declare variable $biblio-dir-path external := $dhq-journal-path || "/biblio/DHQ-Biblio-v3/data";
   (: A map of the BaseX options specific to the Biblio databases. :)
   declare variable $biblio-index-opts := map {
     'attrinclude':  "*:id,*:ID,*:dhqID,*:issuance,*:provenance",
@@ -99,7 +99,6 @@ xquery version "3.1";
 <commands>
   <!-- Set general options. -->
   { local:set-options($option-map) }
-  
   
   <!-- Set DHQ article-specific options. -->
   { local:set-options($article-index-opts) }
