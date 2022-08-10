@@ -10,7 +10,6 @@ xquery version "3.1";
   declare namespace map="http://www.w3.org/2005/xpath-functions/map";
   declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
   declare namespace tei="http://www.tei-c.org/ns/1.0";
-  declare namespace wwp="http://www.wwp.northeastern.edu/ns/textbase";
 (:  OPTIONS  :)
   declare option output:media-type "text/xml";
   declare option output:method "xml";
@@ -29,105 +28,60 @@ xquery version "3.1";
 
 
 (:  FUNCTIONS  :)
+  
   declare function local:get-corresponding-biblio-genre($biblStruct as element(tei:biblStruct)) {
     let $genreMaps := (
         map {
           'biblioGenre': 'ArchivalItem',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ( 'manuscript' )
-            }
+          'zoteroType': local:is-of-type(?, 'manuscript')
         }, map {
           'biblioGenre': 'Artwork',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ( 'artwork' )
-            }
+          'zoteroType': local:is-of-type(?, 'artwork')
         }, map {
           'biblioGenre': 'BlogEntry',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = (
-                  'blogPost',
-                  'podcast'
-                )
-            }
+          'zoteroType': local:is-of-type(?, ('blogPost', 'podcast'))
         }, map {
           'biblioGenre': 'Book',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ( 'book' )
-            }
+          'zoteroType': local:is-of-type(?, 'book')
         }, map {
           'biblioGenre': 'BookInSeries',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = (  (:'book':) )
-            }
+          'zoteroType': local:is-of-type(?, ()) (: book? :)
         }, map {
           'biblioGenre': 'BookSection',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ( 'bookSection' )
-            }
+          'zoteroType': local:is-of-type(?, 'bookSection')
         }, map {
           'biblioGenre': 'ConferencePaper',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ( 'conferencePaper' )
-            }
+          'zoteroType': local:is-of-type(?, ('conferencePaper'))
         }, map {
           'biblioGenre': 'JournalArticle',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = (
-                  'journalArticle',
-                  'magazineArticle'
-                )
-            }
+          'zoteroType': local:is-of-type(?, ('journalArticle', 'magazineArticle'))
         }, map {
           'biblioGenre': 'Other',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ()
-            }
+          'zoteroType': local:is-of-type(?, ())
         }, map {
           'biblioGenre': 'PhysicalMedia',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ()
-            }
+          'zoteroType': local:is-of-type(?, ())
         }, map {
           'biblioGenre': 'Posting',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ( 'forumPost' )
-            }
+          'zoteroType': local:is-of-type(?, 'forumPost')
         }, map {
           'biblioGenre': 'PublicGov',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = (
-                  'bill',
-                  'case',
-                  'hearing',
-                  'patent',
-                  'statute'
-                )
-            }
+          'zoteroType': local:is-of-type(?, ('bill', 'case', 'hearing', 'patent', 'statute'))
         }, map {
           'biblioGenre': 'Report',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ( 'report' )
-            }
+          'zoteroType': local:is-of-type(?, 'report')
         }, map {
           'biblioGenre': 'Series',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ()
-            }
+          'zoteroType': local:is-of-type(?, ())
         }, map {
           'biblioGenre': 'Thesis',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ( 'thesis' )
-            }
+          'zoteroType': local:is-of-type(?, 'thesis')
         }, map {
           'biblioGenre': 'VideoGame',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ()
-            }
+          'zoteroType': local:is-of-type(?, ())
         }, map {
           'biblioGenre': 'WebSite',
-          'zoteroType': function($biblStruct as element(tei:biblStruct)) {
-              $biblStruct/@type = ( 'webpage' )
-            }
+          'zoteroType': local:is-of-type(?, 'webpage')
         }
       )
     let $proposedGenre := $genreMaps[?zoteroType($biblStruct)][1]?biblioGenre
@@ -136,10 +90,27 @@ xquery version "3.1";
         $proposedGenre
       else 'BiblioItem'
   };
+  
+  declare function local:is-of-type($biblStruct as element(tei:biblStruct), $types 
+     as xs:string*) as xs:boolean {
+    $biblStruct/@type = $types
+  };
+
 
 (:  MAIN QUERY  :)
 
 let $zoteroEntries := //tei:body/tei:listBibl/tei:biblStruct
+(: Test for fn:transform(). If it's not available, use the BaseX version. :)
+let $transform := function($map as map(xs:string, item()*)) {
+    let $w3cFn := function-lookup(xs:QName('fn:transform'), 1)
+    let $basexFn := 
+      function-lookup(QName('http://basex.org/modules/xslt', 'xslt:transform'), 3)
+    return
+      if ( exists($w3cFn) ) then $w3cFn($map)?output
+      else if ( exists($basexFn) ) then
+        $basexFn($map?source-node, $map?stylesheet-location, $map?stylesheet-params)
+      else ()
+  }
 return
   <BiblioSet>
     <!-- Drop area for harvestable entries. -->
@@ -149,11 +120,11 @@ return
       for $record in $zoteroEntries
       let $genre := local:get-corresponding-biblio-genre($record)
       return (
-          transform( map {
+          $transform( map {
               'stylesheet-location': $xsl-crosswalk-location,
               'source-node': $record,
               'stylesheet-params': map { QName((),'biblio-genre'): $genre }
-            })?output,
+            }),
           text { "&#xa;" }
         )
     }
