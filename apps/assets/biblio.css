@@ -23,6 +23,7 @@ body > div.main {
   padding: 0 1em;
   display: inline-flex;
   flex: 1 1 auto;
+  gap: 1rem;
   align-self: center;
   width: 90%;
 }
@@ -112,7 +113,7 @@ h4 {
   text-decoration: underline;
 }
 #modal {
-  border: 0.25rem solid #aa4d0f;
+  border: 0.25rem solid #AA4D0F;
   display: flex;
   width: 20%;
   min-width: 300px;
@@ -145,7 +146,7 @@ h4 {
 }
 header {
   margin: 0;
-  border-bottom: 2px solid #aaaaaa;
+  border-bottom: 2px solid #AAA;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -163,16 +164,14 @@ header > nav {
 header > nav > .nav-menu {
   margin-left: 0.25em;
   flex-direction: row;
+  gap: 0.5rem;
   justify-content: flex-start;
 }
 header > nav > .nav-menu > .nav-item {
   margin: 0;
-  border: thin #cccccc;
-  border-style: solid solid none none;
+  border: thin solid #AAA;
+  border-bottom: none;
   min-width: 130px;
-}
-header > nav > .nav-menu > .nav-item:first-child {
-  border-left-style: solid;
 }
 header > nav > .nav-menu > .nav-item .tab {
   border: none;
@@ -182,10 +181,10 @@ header > nav > .nav-menu > .nav-item .tab {
   display: inline-block;
   text-align: center;
   font-size: unset;
-  color: #6789a8;
+  color: #2170B8;
 }
 header > nav > .nav-menu > .nav-item .sub-nav {
-  border: thin solid #aaaaaa;
+  border: thin solid #AAA;
   border-top-style: none;
   padding: 0;
   min-width: 130px;
@@ -198,7 +197,7 @@ header > nav > .nav-menu > .nav-item .sub-nav .button {
   border-width: 0;
   border-radius: 0;
   display: block;
-  color: #6789a8;
+  color: #2170B8;
 }
 header h1 {
   margin: 0.25em 0 0;
@@ -239,7 +238,7 @@ header form.logout {
   background-color: rgba(245, 252, 255, 0.75);
 }
 .sidebar .sidebar-component .sidebar-component {
-  border: thin solid #aaaaaa;
+  border: thin solid #AAA;
   background-color: white;
 }
 .sidebar .sidebar-sticky {
@@ -313,7 +312,7 @@ form input[type='submit'] {
 }
 #sets.dragging .set-container:hover,
 #sets.dragging .set-container:focus {
-  background-color: #eaf6fa;
+  background-color: #EAF6FA;
 }
 #sets .set-container {
   padding: 0.15em 0.2em;
@@ -329,7 +328,7 @@ form input[type='submit'] {
   text-align: right;
 }
 #sets .set-member-group {
-  border: 2px #cccccc;
+  border: 2px #CCC;
   border-style: solid groove;
   /*border-radius: 0.75em 0.2em;*/
   padding: 0.5em;
@@ -381,7 +380,7 @@ textarea {
 }
 input[type='text'].subtle,
 textarea.subtle {
-  border: thin outset #cccccc;
+  border: thin outset #CCC;
   padding: 0.15em 0.3em;
   width: 100%;
   font-weight: bold;
@@ -391,7 +390,7 @@ textarea.subtle {
 }
 input[type='text'].subtle:focus,
 textarea.subtle:focus {
-  border-color: #aaaaaa;
+  border-color: #AAA;
   border-style: inset;
   text-transform: unset;
 }
@@ -436,12 +435,13 @@ table {
   font-size: inherit;
 }
 table tbody tr:nth-of-type(2n+1) {
-  background-color: #eaf6fa;
+  background-color: #EAF6FA;
 }
 table th,
 table td {
-  border: thin #cccccc;
-  border-style: solid dotted;
+  border: solid #888;
+  border-width: 0.12rem thin;
+  padding: 0.5em;
 }
 table th.cell-min,
 table td.cell-min {
@@ -461,11 +461,7 @@ table th ul li,
 table td ul li {
   list-style: circle;
 }
-table th {
-  padding: 0.25em;
-}
 table td {
-  padding: 0.5em;
   vertical-align: top;
 }
 ul li {
@@ -477,24 +473,24 @@ ul li {
 }
 button,
 .button {
-  border: 0.2em outset #cccccc;
+  border: 0.15em outset #888;
   border-radius: 0.75em;
   padding: 0.25em 0.5em;
-  background-color: #fdfdff;
+  background-color: #FDFDFF;
   color: inherit;
 }
 button:hover,
 .button:hover {
-  border-color: #aaaaaa;
+  border-color: #AAA;
   cursor: pointer;
 }
 button:disabled,
 .button:disabled {
-  background-color: #eeeeee;
+  background-color: #EEE;
 }
 button:disabled:hover,
 .button:disabled:hover {
-  border-color: #aaaaaa;
+  border-color: #AAA;
   cursor: not-allowed;
 }
 button.dismissable-btn,
@@ -514,10 +510,10 @@ button.dismissable-btn,
   background-repeat: no-repeat;
 }
 a {
-  color: #6789a8;
+  color: #2170B8;
 }
 a:hover {
-  color: #aa4d0f;
+  color: #AA4D0F;
 }
 a.button,
 a[role="button"] {
@@ -532,7 +528,7 @@ a[role="button"] {
 }
 .editor,
 .reader {
-  border: medium solid #cccccc;
+  border: medium solid #CCC;
   padding: 1em 0.75em;
 }
 nav ul,
@@ -572,7 +568,7 @@ nav.results-nav ol li.results-pg-nav.results-pg-last {
 }
 .results-pg-current,
 .results-pg-total {
-  color: #aa4d0f;
+  color: #AA4D0F;
 }
 .label-group {
   font-size: larger;

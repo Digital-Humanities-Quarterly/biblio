@@ -12,7 +12,7 @@
   @gray:          #AAA;
   @gray-dark:     #888;
   @gray-opaque:   rgba(50, 50, 50, 0.2);
-  @link-blue:     #6789A8;
+  @link-blue:     #2170B8;
   @link-red:      #AA4D0F;
   @offwhite:      #F5F1F1;
   @blue-light:    #EAF6FA;
@@ -44,6 +44,7 @@ body {
     padding: 0 1em;
     display: inline-flex;
     flex: 1 1 auto;
+    gap: 1rem;
     align-self: center;
     width: 90%;
     
@@ -215,17 +216,14 @@ header {
     > .nav-menu {
       margin-left: 0.25em;
       flex-direction: row;
+      gap: 0.5rem;
       justify-content: flex-start;
       
       > .nav-item {
         margin: 0;
-        border: thin @gray-light;
-        border-style: solid solid none none;
+        border: thin solid @gray;
+        border-bottom: none;
         min-width: 130px;
-        
-        &:first-child {
-          border-left-style: solid;
-        }
         
         .tab {
           border: none;
@@ -563,8 +561,9 @@ table {
   }
   
   th, td {
-    border: thin @gray-light;
-    border-style: solid dotted;
+    border: solid @gray-dark;
+    border-width:  0.12rem thin;
+    padding: 0.5em;
   
     &.cell-min {
       width: 10%;
@@ -586,11 +585,9 @@ table {
   } // table th, td
   
   th {
-    padding: 0.25em;
   }
 
   td {
-    padding: 0.5em;
     vertical-align: top;
   } // & td
 } // table
@@ -609,7 +606,7 @@ ul {
 
 button,
 .button {
-  border: 0.2em outset @gray-light;
+  border: 0.15em outset @gray-dark;
   border-radius: 0.75em;
   padding: 0.25em 0.5em;
   background-color: @gray-tinged;
