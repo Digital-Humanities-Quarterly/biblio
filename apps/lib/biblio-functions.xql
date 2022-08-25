@@ -445,9 +445,14 @@ module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib";
 
   declare function dbfx:article-map($article) as map(xs:string, item()*) {
     map {
-      (:'article' : $article,:)
       'id' : function() {
           $article//tei:publicationStmt/tei:idno[@type eq 'DHQarticle-id']/normalize-space(.)
+        },
+      'volume': function() {
+          $article//tei:publicationStmt/tei:idno[@type eq 'volume']/normalize-space(.)
+        },
+      'issue': function() {
+          $article//tei:publicationStmt/tei:idno[@type eq 'issue']/normalize-space(.)
         },
       'path' : $article/base-uri() cast as xs:string,
       'title' : function() as xs:string {
