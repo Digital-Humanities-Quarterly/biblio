@@ -138,7 +138,19 @@ module namespace dbrx="http://digitalhumanities.org/dhq/ns/biblio/rest";
     }
   };
   
-          (: TODO: actual web interface :)
+  (: TODO: actual web interface :)
+  declare
+    %rest:GET
+    %rest:path('/dhq/biblio')
+    %output:method('html')
+  function dbrx:biblio-home-page() {
+    <div>
+      <p>DHQ Biblio is a project by <a href="http://www.digitalhumanities.org/dhq/">Digital Humanities 
+        Quarterly</a> to identify works cited within the journal.
+      </p>
+    </div>
+  };
+  
   declare
     %rest:GET
     %rest:path('/dhq/biblio/{$id}')
