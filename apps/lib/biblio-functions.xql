@@ -32,18 +32,19 @@ module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib";
   declare variable $dbfx:db-articles  := 'dhq-articles';
   
   declare variable $dbfx:assets-before-custom := (
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"/>,
-    <script type="text/javascript">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"/>,
+    <script>
       <![CDATA[/* Set up namespace for DHQ functions */
       var bibjs = bibjs || ]]>{ "{}" }<![CDATA[;
       bibjs.baseUrl = ']]>{ dbfx:make-web-url('/dhq/') }<![CDATA[';]]>
     </script>,
-    <script type="text/javascript" src="{dbfx:make-web-url('/dhq/assets/a11y-common.js')}"/>,
-    <script type="text/javascript" src="{dbfx:make-web-url('/dhq/assets/a11y-navbar-menu.js')}"/>
+    <script src="{dbfx:make-web-url('/dhq/assets/a11y-common.js')}"/>,
+    <script src="{dbfx:make-web-url('/dhq/assets/a11y-navbar-menu.js')}"/>
   );
   declare variable $dbfx:assets-after-custom := (
-    <link rel="stylesheet" type="text/css" href="{dbfx:make-web-url('/dhq/assets/bootstrap-reboot.min.css')}" />,
-    <link rel="stylesheet" type="text/css" href="{dbfx:make-web-url('/dhq/assets/biblio.css')}" />
+    <link rel="stylesheet" type="text/css" href="{dbfx:make-web-url('/dhq/assets/bootstrap.min.css')}" />,
+    <link rel="stylesheet" type="text/css" href="{dbfx:make-web-url('/dhq/assets/biblio.css')}" />,
+    <script src="{dbfx:make-web-url('/dhq/assets/bootstrap.min.js')}"/>
   );
   declare variable $dbfx:biblio-ns := 'http://digitalhumanities.org/dhq/ns/biblio';
   declare %private variable $dbfx:servlet := file:exists(db:option('webpath')||'servlet.xml');

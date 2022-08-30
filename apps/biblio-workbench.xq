@@ -91,7 +91,7 @@ xquery version "3.0";
                type="button" aria-controls="nav-menu-records" aria-expanded="false">Biblio Records</button>
             <ul id="nav-menu-records" class="sub-nav noshow"
                aria-labelledby="nav-menu-records-label" aria-hidden="true">
-              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/view/records')}" class="button">All</a></li>
+              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/records/list')}" class="button">All</a></li>
               <!--<li><a href="#" class="button">In Progress</a></li>-->
             </ul>
           </li>
@@ -100,8 +100,8 @@ xquery version "3.0";
                type="button" aria-controls="nav-menu-articles" aria-expanded="false">DHQ Articles</button>
             <ul id="nav-menu-articles" class="sub-nav noshow" 
                aria-labelledby="nav-menu-articles-label" aria-hidden="true">
-              <!--<li><a href="#" class="button">All Sets</a></li>-->
-              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/view/articles')}" class="button">Sets in Progress</a></li>
+              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list')}" class="button">All Articles</a></li>
+              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list/actionable')}" class="button">Actionable Articles</a></li>
             </ul>
           </li>
           <li class="nav-item">
@@ -257,8 +257,8 @@ xquery version "3.0";
     let $navbar := 
       <nav class="sidebar">
         <ul class="sidebar-component">
-          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/view/records')}">Biblio Records</a></li>
-          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/view/articles')}">DHQ Articles</a></li>
+          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/records/list')}">Biblio Records</a></li>
+          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list')}">DHQ Articles</a></li>
           <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/authority/publishers')}">Authority Control (Publishers)</a></li>
         </ul>
       </nav>
@@ -308,9 +308,18 @@ xquery version "3.0";
   
   declare
     %rest:GET
-    %rest:path('/dhq/biblio-qa/view/articles')
+    %rest:path('/dhq/biblio-qa/articles/list')
     %output:method('html')
   function dbqx:article-index() {
+    
+  };
+  
+  
+  declare
+    %rest:GET
+    %rest:path('/dhq/biblio-qa/articles/list/actionable')
+    %output:method('html')
+  function dbqx:actionable-article-index() {
     let $articlesActionable :=
       dbfx:article-set()[count(.?bibls()?keyed) lt .?bibls()?total]
     let $articlesOutdated := count(mgmt:identify-outdated-files-in-db($dbfx:db-articles))
@@ -329,6 +338,7 @@ xquery version "3.0";
           <table>
             <thead>
               <tr>
+                <th class="cell-min cell-centered">Volume and Issue</th>
                 <th class="cell-min cell-centered">Article #</th>
                 <th>Article title</th>
                 <th class="cell-min cell-centered">Citations without keys</th>
@@ -341,9 +351,12 @@ xquery version "3.0";
               for $article in $articlesActionable
               let $id := $article?id()
               let $setExists := exists(dbqx:get-biblio-set($article?id()))
-              order by $setExists descending, $id
+              let $volIssue := concat($article?volume(),'.',$article?issue())
+                => replace('^0+', '')
+              order by $id descending
               return
                 <tr>
+                  <td class="cell-min cell-centered">{ $volIssue }</td>
                   <td class="cell-min cell-centered">{ $id }</td>
                   <td>{ $article?title() }</td>
                   <td class="cell-min cell-centered">{ count($article?bibls()?nokey) }</td>
@@ -357,14 +370,13 @@ xquery version "3.0";
           </table>
         </div>
       </div>
-    return
-      dbfx:make-xhtml($interface, $dbqx:header)
+    return dbfx:make-xhtml($interface, $dbqx:header)
   };
   
   
   declare
     %rest:GET
-    %rest:path('/dhq/biblio-qa/view/articles/{$article-id}')
+    %rest:path('/dhq/biblio-qa/articles/view/{$article-id}')
     %output:method('html')
   function dbqx:article-citations($article-id as xs:string) {
     let $article := db:open($dbfx:db-articles, $article-id)
@@ -394,7 +406,7 @@ xquery version "3.0";
   
   declare
     %rest:GET
-    %rest:path('/dhq/biblio-qa/view/records')
+    %rest:path('/dhq/biblio-qa/records/list')
     %output:method('html')
   function dbqx:id-index() {
     let $xmlIndex := mgmt:get-custom-index('id')//text[@string]
@@ -430,7 +442,7 @@ xquery version "3.0";
                   <td class="cell-min">{ $idValue }</td>
                   <td></td>
                   <td>{ $entryStatus }</td>
-                  <!--<td><a href="{dbfx:make-web-url('/dhq/biblio-qa/view/records/'||$idValue)}">View entry</a></td>-->
+                  <!--<td><a href="{dbfx:make-web-url('/dhq/biblio-qa/records/view/'||$idValue)}">View entry</a></td>-->
                   <td class="cell-min cell-centered">{ $actions }</td>
                 </tr>
             }
@@ -961,6 +973,8 @@ xquery version "3.0";
               <ul>
               {
                 for $file in $outdatedArticles
+                
+                order by $file descending
                 return
                   <li>{ $file/text() }</li>
               }
