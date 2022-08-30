@@ -330,7 +330,7 @@ xquery version "3.0";
       if ( exists($articlesOutdated) or exists($articlesIngestible) ) then 
         <div class="alert alert-warning">
           { $articlesOutdated, $articlesIngestible }
-          <a class="alert-link" href="{dbfx:make-web-url('/dhq/biblio-qa/maintain')}">View and update.</a>
+          <a class="alert-link" href="{dbfx:make-web-url('/dhq/biblio-qa/articles/maintain')}">View and update.</a>
         </div>
       else ()
   };
@@ -974,36 +974,49 @@ xquery version "3.0";
 
   declare
     %rest:GET
-    %rest:path('/dhq/biblio-qa/maintain')
+    %rest:path('/dhq/biblio-qa/articles/maintain')
     %output:method('html')
-  function dbqx:maintain() {
+  function dbqx:maintain-articles() {
     let $outdatedArticles := mgmt:identify-outdated-files-in-db($dbfx:db-articles)
     let $interface :=
-      <div class="container container-main">
-        <div class="container container-col">
-          <p>There are { count($outdatedArticles) } outdated DHQ articles.</p>
-          
-          {
-            if ( count($outdatedArticles) gt 0 ) then
-            (
-              <p>
-                <a href="{dbfx:make-web-url('/dhq/biblio-qa/maintain/update-articles')}" class="button">Update all</a>
-              </p>,
-              <ul>
-              {
-                for $file in $outdatedArticles
-                
-                order by $file descending
-                return
+      <div>
+        <p>There are { count($outdatedArticles) } outdated DHQ articles.</p>
+        {
+          if ( count($outdatedArticles) gt 0 ) then
+          (
+            <p>
+              <a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/maintain/update')}" class="button">Update all</a>
+            </p>,
+            <ul>
+            {
+              for $file in $outdatedArticles
+              let $article := db:open($dbfx:db-articles, $file)
+              order by $file descending
+              return
+                if ( not(exists($article)) ) then
                   <li>{ $file/text() }</li>
-              }
-              </ul>
-            )
-            else ()
-          }
-        </div>
+                else
+                  let $artMap := dbfx:article-map($article)
+                  return
+                    <li>{$artMap?id()}: “{ $artMap?title() }”</li>
+            }
+            </ul>
+          )
+          else ()
+        }
       </div>
     return dbfx:make-xhtml($interface, $dbqx:header)
+  };
+  
+  
+  declare
+    %rest:GET
+    %rest:path('/dhq/biblio-qa/articles/maintain/update')
+    %output:method('html')
+    %updating
+  function dbqx:update-articles() {
+    let $wrap := dbfx:make-xhtml(?, $dbqx:header)
+    return mgmt:update-db-from-file-system($dbfx:db-articles, false(), $wrap)
   };
   
   
@@ -1015,17 +1028,6 @@ xquery version "3.0";
   function dbqx:update-id-index() {
     let $wrap := dbfx:make-xhtml(?, $dbqx:header)
     return mgmt:rebuild-id-index($wrap)
-  };
-  
-  
-  declare
-    %rest:GET
-    %rest:path('/dhq/biblio-qa/maintain/update-articles')
-    %output:method('html')
-    %updating
-  function dbqx:update-articles() {
-    let $wrap := dbfx:make-xhtml(?, $dbqx:header)
-    return mgmt:update-db-from-file-system($dbfx:db-articles, false(), $wrap)
   };
   
   
