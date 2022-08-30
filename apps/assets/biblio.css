@@ -428,7 +428,6 @@ ul.grid {
   grid-column: 2;
 }
 table {
-  margin: 0 1em;
   width: 100%;
   flex-shrink: 0;
   table-layout: fixed;

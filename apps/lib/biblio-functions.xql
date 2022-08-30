@@ -44,7 +44,7 @@ module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib";
   declare variable $dbfx:assets-after-custom := (
     <link rel="stylesheet" type="text/css" href="{dbfx:make-web-url('/dhq/assets/bootstrap.min.css')}" />,
     <link rel="stylesheet" type="text/css" href="{dbfx:make-web-url('/dhq/assets/biblio.css')}" />,
-    <script src="{dbfx:make-web-url('/dhq/assets/bootstrap.min.js')}"/>
+    <script src="{dbfx:make-web-url('/dhq/assets/bootstrap.bundle.min.js')}"/>
   );
   declare variable $dbfx:biblio-ns := 'http://digitalhumanities.org/dhq/ns/biblio';
   declare %private variable $dbfx:servlet := file:exists(db:option('webpath')||'servlet.xml');
@@ -450,10 +450,18 @@ module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib";
           $article//tei:publicationStmt/tei:idno[@type eq 'DHQarticle-id']/normalize-space(.)
         },
       'volume': function() {
-          $article//tei:publicationStmt/tei:idno[@type eq 'volume']/normalize-space(.)
+          let $vol := 
+            $article//tei:publicationStmt/tei:idno[@type eq 'volume']/normalize-space(.)
+          return
+            try {
+              replace($vol, '^0+', '') => xs:integer()
+            } catch err:FORG0001 { () }
         },
       'issue': function() {
-          $article//tei:publicationStmt/tei:idno[@type eq 'issue']/normalize-space(.)
+          let $issue :=
+            $article//tei:publicationStmt/tei:idno[@type eq 'issue']/normalize-space(.)
+          return
+            try { xs:integer($issue) } catch err:FORG0001 { () }
         },
       'path' : $article/base-uri() cast as xs:string,
       'title' : function() as xs:string {

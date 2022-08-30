@@ -314,6 +314,26 @@ xquery version "3.0";
     
   };
   
+  declare %private function dbqx:look-for-outdated-articles() {
+    let $articlesOutdated := 
+      let $num := count(mgmt:identify-outdated-files-in-db($dbfx:db-articles))
+      return 
+        if ( $num eq 0 ) then ()
+        else concat("There are ",$num," out-of-date DHQ articles. ")
+    let $articlesIngestible := 
+      let $num := count(mgmt:identify-ingestible-articles())
+      return 
+        if ( $num eq 0 ) then ()
+        else
+          concat("There are ",$num," new DHQ articles missing from the database. ")
+    return
+      if ( exists($articlesOutdated) or exists($articlesIngestible) ) then 
+        <div class="alert alert-warning">
+          { $articlesOutdated, $articlesIngestible }
+          <a class="alert-link" href="{dbfx:make-web-url('/dhq/biblio-qa/maintain')}">View and update.</a>
+        </div>
+      else ()
+  };
   
   declare
     %rest:GET
@@ -322,16 +342,10 @@ xquery version "3.0";
   function dbqx:actionable-article-index() {
     let $articlesActionable :=
       dbfx:article-set()[count(.?bibls()?keyed) lt .?bibls()?total]
-    let $articlesOutdated := count(mgmt:identify-outdated-files-in-db($dbfx:db-articles))
     let $interface :=
       <div>
         <div class="toolbar">
-          {
-            if ( $articlesOutdated gt 0 ) then
-            <p>There are { $articlesOutdated } outdated DHQ articles. 
-              <a href="{dbfx:make-web-url('/dhq/biblio-qa/maintain')}">View and update.</a></p>
-            else ()
-          }
+          { dbqx:look-for-outdated-articles() }
           <p>There are { count($articlesActionable) } actionable articles.</p>
         </div>
         <div>
@@ -351,9 +365,13 @@ xquery version "3.0";
               for $article in $articlesActionable
               let $id := $article?id()
               let $setExists := exists(dbqx:get-biblio-set($article?id()))
-              let $volIssue := concat($article?volume(),'.',$article?issue())
-                => replace('^0+', '')
-              order by $id descending
+              let $volIssue := 
+                if ( empty($article?volume()) ) then ()
+                else concat($article?volume(),'.',$article?issue())
+                  => replace('^0+', '')
+              (: Sort articles with the most recent volume and issue first. :)
+              order by $article?volume() descending empty least, $article?issue() descending,
+                $id descending
               return
                 <tr>
                   <td class="cell-min cell-centered">{ $volIssue }</td>
@@ -361,9 +379,10 @@ xquery version "3.0";
                   <td>{ $article?title() }</td>
                   <td class="cell-min cell-centered">{ count($article?bibls()?nokey) }</td>
                   <td class="cell-min cell-centered">{ $article?bibls()?total }</td>
-                  <td class="cell-min cell-centered"><a href="{dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$article?id())}">{
-                        if ( $setExists ) then "Edit" else "Preview"
-                      }</a></td>
+                  <td class="cell-min cell-centered"><a href="{
+                    dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$article?id())}">{
+                      if ( $setExists ) then "Edit" else "Preview"
+                    }</a></td>
                 </tr>
             }
             </tbody>
