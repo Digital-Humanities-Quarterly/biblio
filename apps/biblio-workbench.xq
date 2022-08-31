@@ -311,12 +311,37 @@ xquery version "3.0";
     %rest:path('/dhq/biblio-qa/articles/list')
     %output:method('html')
   function dbqx:article-index() {
+    let $volumes :=
+      for $articleSet in dbfx:article-set()
+      group by $volume := $articleSet?volume()
+      order by $volume descending empty greatest
+      return
+        <section id="vol{$volume}">
+          <h2>Volume {$volume}</h2>
+          { dbqx:make-table-of-articles($articleSet) }
+        </section>
     let $interface :=
-      <main>
-        
-      </main>
+      <div class="container">
+        <nav class="sidebar">
+          <div class="sidebar-component sidebar-sticky">
+            <ul>{ 
+              for $vol in $volumes[@id]
+              return
+                <li><a href="#{$vol/@id/data(.)}">{ 
+                  $vol/*:h2/normalize-space() }</a></li>
+            }</ul>
+          </div>
+        </nav>
+        <main class="main-content">
+          <div class="toolbar">
+            { dbqx:alert-to-article-updates() }
+          </div>
+          { $volumes }
+        </main>
+      </div>
     return dbfx:make-xhtml($interface, $dbqx:header)
-  };
+  }; (: END /dhq/biblio-qa/articles/list :)
+  
   
   declare
     %rest:GET
