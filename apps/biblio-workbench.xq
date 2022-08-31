@@ -344,18 +344,34 @@ xquery version "3.0";
       for $file in mgmt:identify-outdated-files-in-db($dbfx:db-articles)
       return db:open($dbfx:db-articles, $file)
         => dbfx:article-map()
+    let $ingestibleArticles := mgmt:identify-ingestible-articles()
+    let $canUpdate := count($outdatedArticles) + count($ingestibleArticles) > 0
     let $interface :=
       <div>
-        <p>There are { count($outdatedArticles) } outdated DHQ articles.</p>
+        <p>There are { count($ingestibleArticles) } article(s) not available in the 
+          database, and { count($outdatedArticles) } which can be updated.</p>
         {
-          if ( count($outdatedArticles) gt 0 ) then
-          (
-            <p>
-              <a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/maintain/update')}" class="button">Update all</a>
-            </p>,
-            dbqx:make-table-of-articles($outdatedArticles)
-          )
-          else ()
+          if ( not($canUpdate) ) then
+            <p>Nothing to do!</p>
+          else (
+              <form method="post" action="{
+                 dbfx:make-web-url('/dhq/biblio-qa/articles/maintain/update')}">
+                <button type="submit">Update all</button>
+              </form>
+              ,
+              let $articleMaps := ( $outdatedArticles,
+                  if ( count($ingestibleArticles) ) then
+                    let $dbPath := mgmt:get-db-base-path($dbfx:db-articles)
+                    for $file in $ingestibleArticles
+                    let $filepath := concat($dbPath,'/',$file)
+                    return 
+                      if ( doc-available($filepath) ) then
+                        doc($filepath) => dbfx:article-map()
+                      else ()
+                  else ()
+                )
+              return dbqx:make-table-of-articles($articleMaps)
+            )
         }
       </div>
     return dbfx:make-xhtml($interface, $dbqx:header)
@@ -368,7 +384,11 @@ xquery version "3.0";
     %output:method('html')
     %updating
   function dbqx:update-articles() {
-    let $wrap := dbfx:make-xhtml(?, $dbqx:header)
+    let $wrap := function($content) {
+        let $containedContent :=
+          <div>{ $content }</div>
+        return dbfx:make-xhtml($content, $dbqx:header)
+      }
     return mgmt:update-db-from-file-system($dbfx:db-articles, false(), $wrap)
   };
   
@@ -1444,6 +1464,14 @@ xquery version "3.0";
         (: Sort articles with the most recent volume and issue first. :)
         order by $article?volume() descending empty least, $article?issue() descending,
           $id descending
+        let $biblioSet :=
+          if ( starts-with($article?path, 'file:/') ) then
+            "Not yet available"
+          else
+            <a href="{
+               dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$article?id())}">{
+              if ( $setExists ) then "Edit" else "Preview"
+            }</a>
         return
           <tr>
             <td class="cell-min cell-centered">{ $volIssue }</td>
@@ -1451,10 +1479,7 @@ xquery version "3.0";
             <td>{ $article?title() }</td>
             <td class="cell-min cell-centered">{ count($article?bibls()?nokey) }</td>
             <td class="cell-min cell-centered">{ $article?bibls()?total }</td>
-            <td class="cell-min cell-centered"><a href="{
-              dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$article?id())}">{
-                if ( $setExists ) then "Edit" else "Preview"
-              }</a></td>
+            <td class="cell-min cell-centered">{ $biblioSet }</td>
           </tr>
       }
       </tbody>

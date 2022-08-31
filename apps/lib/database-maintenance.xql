@@ -168,7 +168,11 @@ xquery version "3.1";
     let $allArticles := 
       file:list($articlesPath, true(), '*.xml')[matches(., $mgmt:dhq-article-regex)]
     return
-      $allArticles[not(. = db:list($mgmt:db-articles))]
+      for $file in $allArticles[not(. = db:list($mgmt:db-articles))]
+      return
+        if ( doc-available(concat($articlesPath,'/',$file)) ) then
+          $file
+        else ()
   };
   
   
