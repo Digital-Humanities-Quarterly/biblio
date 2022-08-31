@@ -379,17 +379,38 @@ xquery version "3.0";
   
   
   declare
-    %rest:GET
+    %rest:POST
     %rest:path('/dhq/biblio-qa/articles/maintain/update')
     %output:method('html')
     %updating
   function dbqx:update-articles() {
-    let $wrap := function($content) {
+    let $returnMsg := (
+        text { "Go to the " },
+        <a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list')}">list of all 
+          DHQ articles</a>,
+        text { "." }
+      )
+    let $displayUpdates := function($info-map as map(xs:string, item()*)*) {
+        let $content :=
+          for $map in $info-map
+          order by $map?id descending
+          return
+            <li>{ $map?action } article <a href="{
+               dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$map?id)
+              }">{ $map?id }</a></li>
         let $containedContent :=
-          <div>{ $content }</div>
-        return dbfx:make-xhtml($content, $dbqx:header)
+          if ( count($info-map) eq 0 ) then
+            <p>The <code>dhq-articles</code> database is in sync with the 
+              filesystem. It has <em>not</em> been updated. {$returnMsg}</p>
+          else
+            <div>
+              <p>The <code>dhq-articles</code> database has been updated! {$returnMsg}</p>
+              <p>Changes made:</p>
+              <ul>{ $content }</ul>
+            </div>
+        return dbfx:make-xhtml($containedContent, $dbqx:header)
       }
-    return mgmt:update-db-from-file-system($dbfx:db-articles, false(), $wrap)
+    return mgmt:update-article-db-from-file-system($displayUpdates)
   };
   
   
@@ -408,7 +429,8 @@ xquery version "3.0";
         <h2>Viewing bibliographic records for article
           <a href="{ dbfx:get-article-url($article) }" target="_blank">{ $article-id }</a></h2>
         <div class="sidebar-component">
-          <p><a href="{dbfx:make-web-url('/dhq/biblio-qa/create/set/'||$article-id)}">Create/edit Biblio entries</a></p>
+          <p><a href="{dbfx:make-web-url('/dhq/biblio-qa/create/set/'||$article-id)
+            }">Create/edit Biblio entries</a></p>
         </div>
         { dbqx:get-search-component() }
       </div>

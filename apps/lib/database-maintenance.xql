@@ -488,6 +488,61 @@ xquery version "3.1";
     )
   };
   
+  declare %updating function mgmt:update-article-db-from-file-system() {
+    mgmt:update-article-db-from-file-system(())
+  };
+  
+  declare %updating function mgmt:update-article-db-from-file-system(
+     $post-update-function as (function(item()*) as item()*)?) {
+    mgmt:update-article-db-from-file-system($post-update-function, false())
+  };
+  
+  declare %updating function mgmt:update-article-db-from-file-system(
+     $post-update-function as (function(item()*) as item()*)?, $is-dry-run as 
+     xs:boolean) {
+    let $dbPath := mgmt:get-db-base-path($mgmt:db-articles)
+    let $getUpdateInfo := function ($file, $article, $action) {
+        map {
+            'action': $action,
+            'id': $article//tei:publicationStmt/tei:idno[@type eq 'DHQarticle-id']
+              /normalize-space(.),
+            'filename': $file,
+            'filepath': $article/base-uri()
+          }
+      }
+    let $ingestibleArticles := 
+      for $file in mgmt:identify-ingestible-articles()
+      let $filepath := concat($dbPath,'/',$file)
+      return
+        if ( doc-available($filepath) ) then 
+          let $article := doc($filepath)
+          return $getUpdateInfo($file, $article, 'Added')
+        else ()
+    let $outdatedArticles := 
+      for $file in mgmt:identify-outdated-files-in-db($mgmt:db-articles)
+      let $article := db:open($mgmt:db-articles, $file)
+      return $getUpdateInfo($file, $article, 'Updated')
+    let $updateInfo :=
+      ( $ingestibleArticles, $outdatedArticles )
+    let $output :=
+      if ( exists($post-update-function) ) then
+        $post-update-function($updateInfo)
+      else $updateInfo
+    return (
+        update:output($output),
+        (: If this is a dry run, do nothing. Otherwise, apply XQuery Updates for each 
+          anticipated file. :)
+        if ( $is-dry-run ) then ()
+        else
+          for $map in $updateInfo
+          let $filename := $map?filename
+          let $fileSysPath := 
+            concat($dbPath, if ( $map?action='Added' ) then '/' else '' ,$filename)
+          return
+            db:replace($mgmt:db-articles, $filename, $fileSysPath)
+      )
+  };
+  
   declare %updating function mgmt:update-db-from-file-system($db-name as xs:string, 
      $is-dry-run as xs:boolean) {
     mgmt:update-db-from-file-system($db-name, $is-dry-run, ())
