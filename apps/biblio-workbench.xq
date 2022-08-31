@@ -314,27 +314,6 @@ xquery version "3.0";
     
   };
   
-  declare %private function dbqx:look-for-outdated-articles() {
-    let $articlesOutdated := 
-      let $num := count(mgmt:identify-outdated-files-in-db($dbfx:db-articles))
-      return 
-        if ( $num eq 0 ) then ()
-        else concat("There are ",$num," out-of-date DHQ articles. ")
-    let $articlesIngestible := 
-      let $num := count(mgmt:identify-ingestible-articles())
-      return 
-        if ( $num eq 0 ) then ()
-        else
-          concat("There are ",$num," new DHQ articles missing from the database. ")
-    return
-      if ( exists($articlesOutdated) or exists($articlesIngestible) ) then 
-        <div class="alert alert-warning">
-          { $articlesOutdated, $articlesIngestible }
-          <a class="alert-link" href="{dbfx:make-web-url('/dhq/biblio-qa/articles/maintain')}">View and update.</a>
-        </div>
-      else ()
-  };
-  
   declare
     %rest:GET
     %rest:path('/dhq/biblio-qa/articles/list/actionable')
@@ -345,51 +324,52 @@ xquery version "3.0";
     let $interface :=
       <div>
         <div class="toolbar">
-          { dbqx:look-for-outdated-articles() }
+          { dbqx:alert-to-article-updates() }
           <p>There are { count($articlesActionable) } actionable articles.</p>
         </div>
         <div>
-          <table>
-            <thead>
-              <tr>
-                <th class="cell-min cell-centered">Volume and Issue</th>
-                <th class="cell-min cell-centered">Article #</th>
-                <th>Article title</th>
-                <th class="cell-min cell-centered">Citations without keys</th>
-                <th class="cell-min cell-centered">Total citations</th>
-                <th class="cell-min cell-centered">Biblio set</th>
-              </tr>
-            </thead>
-            <tbody>
-            {
-              for $article in $articlesActionable
-              let $id := $article?id()
-              let $setExists := exists(dbqx:get-biblio-set($article?id()))
-              let $volIssue := 
-                if ( empty($article?volume()) ) then ()
-                else concat($article?volume(),'.',$article?issue())
-                  => replace('^0+', '')
-              (: Sort articles with the most recent volume and issue first. :)
-              order by $article?volume() descending empty least, $article?issue() descending,
-                $id descending
-              return
-                <tr>
-                  <td class="cell-min cell-centered">{ $volIssue }</td>
-                  <td class="cell-min cell-centered">{ $id }</td>
-                  <td>{ $article?title() }</td>
-                  <td class="cell-min cell-centered">{ count($article?bibls()?nokey) }</td>
-                  <td class="cell-min cell-centered">{ $article?bibls()?total }</td>
-                  <td class="cell-min cell-centered"><a href="{
-                    dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$article?id())}">{
-                      if ( $setExists ) then "Edit" else "Preview"
-                    }</a></td>
-                </tr>
-            }
-            </tbody>
-          </table>
+          { dbqx:make-table-of-articles($articlesActionable) }
         </div>
       </div>
     return dbfx:make-xhtml($interface, $dbqx:header)
+  };
+
+
+  declare
+    %rest:GET
+    %rest:path('/dhq/biblio-qa/articles/maintain')
+    %output:method('html')
+  function dbqx:maintain-articles() {
+    let $outdatedArticles := 
+      for $file in mgmt:identify-outdated-files-in-db($dbfx:db-articles)
+      return db:open($dbfx:db-articles, $file)
+        => dbfx:article-map()
+    let $interface :=
+      <div>
+        <p>There are { count($outdatedArticles) } outdated DHQ articles.</p>
+        {
+          if ( count($outdatedArticles) gt 0 ) then
+          (
+            <p>
+              <a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/maintain/update')}" class="button">Update all</a>
+            </p>,
+            dbqx:make-table-of-articles($outdatedArticles)
+          )
+          else ()
+        }
+      </div>
+    return dbfx:make-xhtml($interface, $dbqx:header)
+  };
+  
+  
+  declare
+    %rest:GET
+    %rest:path('/dhq/biblio-qa/articles/maintain/update')
+    %output:method('html')
+    %updating
+  function dbqx:update-articles() {
+    let $wrap := dbfx:make-xhtml(?, $dbqx:header)
+    return mgmt:update-db-from-file-system($dbfx:db-articles, false(), $wrap)
   };
   
   
@@ -970,54 +950,6 @@ xquery version "3.0";
       update:output($referenceSet)
     )
   };
-
-
-  declare
-    %rest:GET
-    %rest:path('/dhq/biblio-qa/articles/maintain')
-    %output:method('html')
-  function dbqx:maintain-articles() {
-    let $outdatedArticles := mgmt:identify-outdated-files-in-db($dbfx:db-articles)
-    let $interface :=
-      <div>
-        <p>There are { count($outdatedArticles) } outdated DHQ articles.</p>
-        {
-          if ( count($outdatedArticles) gt 0 ) then
-          (
-            <p>
-              <a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/maintain/update')}" class="button">Update all</a>
-            </p>,
-            <ul>
-            {
-              for $file in $outdatedArticles
-              let $article := db:open($dbfx:db-articles, $file)
-              order by $file descending
-              return
-                if ( not(exists($article)) ) then
-                  <li>{ $file/text() }</li>
-                else
-                  let $artMap := dbfx:article-map($article)
-                  return
-                    <li>{$artMap?id()}: “{ $artMap?title() }”</li>
-            }
-            </ul>
-          )
-          else ()
-        }
-      </div>
-    return dbfx:make-xhtml($interface, $dbqx:header)
-  };
-  
-  
-  declare
-    %rest:GET
-    %rest:path('/dhq/biblio-qa/articles/maintain/update')
-    %output:method('html')
-    %updating
-  function dbqx:update-articles() {
-    let $wrap := dbfx:make-xhtml(?, $dbqx:header)
-    return mgmt:update-db-from-file-system($dbfx:db-articles, false(), $wrap)
-  };
   
   
   declare
@@ -1090,6 +1022,25 @@ xquery version "3.0";
               insert node attribute duplicate-id { $citation } into $modItem
             return $modItem
         else $freshItem
+  };
+  
+  (:~
+    Check for DHQ article updates on the filesystem, which aren't yet reflected in 
+    the database. If there are updates, create an alert.
+   :)
+  declare %private function dbqx:alert-to-article-updates() {
+    let $articlesOutdated := 
+      count(mgmt:identify-outdated-files-in-db($dbfx:db-articles))
+    let $articlesIngestible := count(mgmt:identify-ingestible-articles())
+    return
+      if ( $articlesIngestible + $articlesOutdated > 0 ) then 
+        <div class="alert alert-warning">
+          The DHQ articles database is out of sync with the filesystem!
+          <a class="alert-link" href="{
+             dbfx:make-web-url('/dhq/biblio-qa/articles/maintain')
+            }">View changes.</a>
+        </div>
+      else ()
   };
   
   (:~
@@ -1464,6 +1415,50 @@ xquery version "3.0";
       provxq:specialization-of($entity, $generic-entity)
     return
       ( $entity, $specialRel )
+  };
+  
+  (:~
+    Generate an HTML table using data derived from DHQ articles' metadata.
+   :)
+  declare function dbqx:make-table-of-articles($articles as map(xs:string, item()*)*) {
+    <table>
+      <thead>
+        <tr>
+          <th class="cell-min cell-centered">Volume and Issue</th>
+          <th class="cell-min cell-centered">Article #</th>
+          <th>Article title</th>
+          <th class="cell-min cell-centered">Citations without keys</th>
+          <th class="cell-min cell-centered">Total citations</th>
+          <th class="cell-min cell-centered">Biblio set</th>
+        </tr>
+      </thead>
+      <tbody>
+      {
+        for $article in $articles
+        let $id := $article?id()
+        let $setExists := exists(dbqx:get-biblio-set($article?id()))
+        let $volIssue := 
+          if ( empty($article?volume()) ) then ()
+          else concat($article?volume(),'.',$article?issue())
+            => replace('^0+', '')
+        (: Sort articles with the most recent volume and issue first. :)
+        order by $article?volume() descending empty least, $article?issue() descending,
+          $id descending
+        return
+          <tr>
+            <td class="cell-min cell-centered">{ $volIssue }</td>
+            <td class="cell-min cell-centered">{ $id }</td>
+            <td>{ $article?title() }</td>
+            <td class="cell-min cell-centered">{ count($article?bibls()?nokey) }</td>
+            <td class="cell-min cell-centered">{ $article?bibls()?total }</td>
+            <td class="cell-min cell-centered"><a href="{
+              dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$article?id())}">{
+                if ( $setExists ) then "Edit" else "Preview"
+              }</a></td>
+          </tr>
+      }
+      </tbody>
+    </table>
   };
   
   
