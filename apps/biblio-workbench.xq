@@ -225,7 +225,7 @@ xquery version "3.0";
     %output:method('html')
   function dbqx:index-of-titles() {
     let $interface :=
-      <div>
+      <main>
         <div>
           <p><a href="#">Test</a></p>
         </div>
@@ -240,7 +240,7 @@ xquery version "3.0";
                 <p>{ $distinct }</p>:)
           }
         </div>
-      </div>
+      </main>
     return
       dbfx:make-xhtml($interface, $dbqx:header)
   };
@@ -264,7 +264,7 @@ xquery version "3.0";
       </nav>
     let $interface := (
       $navbar,
-      <div class="main-content">
+      <main class="main-content">
         <div>
           <p>There are { count($workingRecords) } Biblio entries in progress.</p>
           <table>
@@ -300,7 +300,7 @@ xquery version "3.0";
             </tbody>
           </table>
         </div>
-      </div>
+      </main>
     )
     return dbfx:make-xhtml($interface, $dbqx:header)
   };
@@ -311,7 +311,11 @@ xquery version "3.0";
     %rest:path('/dhq/biblio-qa/articles/list')
     %output:method('html')
   function dbqx:article-index() {
-    
+    let $interface :=
+      <main>
+        
+      </main>
+    return dbfx:make-xhtml($interface, $dbqx:header)
   };
   
   declare
@@ -322,7 +326,7 @@ xquery version "3.0";
     let $articlesActionable :=
       dbfx:article-set()[count(.?bibls()?keyed) lt .?bibls()?total]
     let $interface :=
-      <div>
+      <main>
         <div class="toolbar">
           { dbqx:alert-to-article-updates() }
           <p>There are { count($articlesActionable) } actionable articles.</p>
@@ -330,7 +334,7 @@ xquery version "3.0";
         <div>
           { dbqx:make-table-of-articles($articlesActionable) }
         </div>
-      </div>
+      </main>
     return dbfx:make-xhtml($interface, $dbqx:header)
   };
 
@@ -347,7 +351,7 @@ xquery version "3.0";
     let $ingestibleArticles := mgmt:identify-ingestible-articles()
     let $canUpdate := count($outdatedArticles) + count($ingestibleArticles) > 0
     let $interface :=
-      <div>
+      <main>
         <p>There are { count($ingestibleArticles) } article(s) not available in the 
           database, and { count($outdatedArticles) } which can be updated.</p>
         {
@@ -373,7 +377,7 @@ xquery version "3.0";
               return dbqx:make-table-of-articles($articleMaps)
             )
         }
-      </div>
+      </main>
     return dbfx:make-xhtml($interface, $dbqx:header)
   };
   
@@ -403,11 +407,11 @@ xquery version "3.0";
             <p>The <code>dhq-articles</code> database is in sync with the 
               filesystem. It has <em>not</em> been updated. {$returnMsg}</p>
           else
-            <div>
+            <main>
               <p>The <code>dhq-articles</code> database has been updated! {$returnMsg}</p>
               <p>Changes made:</p>
               <ul>{ $content }</ul>
-            </div>
+            </main>
         return dbfx:make-xhtml($containedContent, $dbqx:header)
       }
     return mgmt:update-article-db-from-file-system($displayUpdates)
@@ -436,10 +440,10 @@ xquery version "3.0";
       </div>
     let $interface := dbfx:make-article-bibliography($articleBibliography)
     let $htmlParts := 
-      <div class="container">
+      <main class="container">
         { $sidebar }
         { $interface }
-      </div>
+      </main>
     return
       dbfx:make-xhtml($htmlParts, $dbqx:header, $article-id, $assets)
   };
@@ -452,7 +456,7 @@ xquery version "3.0";
   function dbqx:id-index() {
     let $xmlIndex := mgmt:get-custom-index('id')//text[@string]
     let $interface :=
-      <div>
+      <main>
         <div class="toolbar">
           <p>There are { count($xmlIndex) } Biblio entries.</p>
           <p><a href="{dbfx:make-web-url('/dhq/biblio-qa/maintain/index/id')}">Rebuild the <code>@ID</code> index.</a></p>
@@ -490,7 +494,7 @@ xquery version "3.0";
             </tbody>
           </table>
         </div>
-      </div>
+      </main>
     return
       dbfx:make-xhtml($interface, $dbqx:header)
   };
