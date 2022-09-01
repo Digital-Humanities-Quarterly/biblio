@@ -147,15 +147,19 @@ h4 {
   z-index: 2;
   background-color: rgba(50, 50, 50, 0.2);
 }
+.dropdown-menu {
+  --bs-dropdown-border-color: #AAA;
+  --bs-dropdown-border-radius: 0;
+}
 header {
   margin: 0;
   border-bottom: 2px solid #AAA;
   display: flex;
   align-items: flex-end;
+  gap: 0.5rem;
   justify-content: space-between;
 }
 header > .biblio-qa-header {
-  padding: 0 0.5em 0.25em 0;
   width: 100%;
   display: flex;
   align-items: flex-end;
@@ -202,10 +206,10 @@ header > nav > .nav-menu > .nav-item .sub-nav .button {
   display: block;
   color: #2170B8;
 }
-header h1 {
-  margin: 0.25em 0 0;
+header .brand {
+  margin: 0.25em 0.25em 0;
 }
-header h1 a {
+header .brand a {
   text-decoration: none;
 }
 header div {

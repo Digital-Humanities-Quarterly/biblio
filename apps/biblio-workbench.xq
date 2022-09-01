@@ -2,18 +2,22 @@ xquery version "3.0";
 
   module namespace dbqx="http://digitalhumanities.org/dhq/ns/biblio-qa/rest";
 (:  LIBRARIES  :)
-  import module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib" at "lib/biblio-functions.xql";
-  import module namespace dbrx="http://digitalhumanities.org/dhq/ns/biblio/rest" at "biblio-public.xq";
+  import module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib" 
+    at "lib/biblio-functions.xql";
+  import module namespace dbrx="http://digitalhumanities.org/dhq/ns/biblio/rest" 
+    at "biblio-public.xq";
   import module namespace lev="http://digitalhumanities.org/dhq/ns/levenshtein" 
     at "lib/levenshtein-distance.xql";
   import module namespace mgmt="http://digitalhumanities.org/dhq/ns/biblio/maintenance"
     at "lib/database-maintenance.xql";
   import module namespace mrng="http://digitalhumanities.org/dhq/ns/meta-relaxng"
     at "lib/relaxng.xql";
-  import module namespace provxq="http://digitalhumanities.org/dhq/ns/prov" at "lib/prov.xql";
+  import module namespace provxq="http://digitalhumanities.org/dhq/ns/prov" 
+    at "lib/prov.xql";
   import module namespace request = "http://exquery.org/ns/request";
   import module namespace session = "http://basex.org/modules/session";
-  import module namespace wpi="http://www.wwp.northeastern.edu/ns/api/functions" at "lib/api.xql";
+  import module namespace wpi="http://www.wwp.northeastern.edu/ns/api/functions" 
+    at "lib/api.xql";
 (:  NAMESPACES  :)
   declare namespace array="http://www.w3.org/2005/xpath-functions/array";
   declare namespace bprov="http://digitalhumanities.org/dhq/biblio-qa/prov/";
@@ -45,37 +49,44 @@ xquery version "3.0";
 
 
 (:  VARIABLES  :)
+  
+  (: Whether or not to publish the Workbench site pages defined here. :)
   declare variable $dbqx:workbench-available := true(); (:doc-available('dev.xml');:)
+  
+  (: Optional CSS and JS files that can be referenced in any given page. :)
   declare variable $dbqx:additional-assets := map {
       'acejs': (
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js"></script>,
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/mode-xml.js"></script>,
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/theme-tomorrow.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js" />,
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/mode-xml.js" />,
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/theme-tomorrow.js" />
       ),
       'd3js':
-        <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>,
+        <script src="https://d3js.org/d3.v5.min.js"></script>,
       'd3sets':
-        <script type="text/javascript" src="{dbfx:make-web-url('/dhq/assets/data-driven-sets.js')}"></script>,
+        <script src="{dbfx:make-web-url('/dhq/assets/data-driven-sets.js')}" />,
       'jquery': 
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>,
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" />,
       'keywords': 
-        <script type="text/javascript" src="{dbfx:make-web-url('/dhq/assets/asynchronous-keywords.js')}"></script>,
+        <script src="{dbfx:make-web-url('/dhq/assets/asynchronous-keywords.js')}" />,
       'modal':
-        <script type="text/javascript" src="{dbfx:make-web-url('/dhq/assets/a11y-modal.js')}"></script>,
+        <script src="{dbfx:make-web-url('/dhq/assets/a11y-modal.js')}"></script>,
       'xonomy': (
-        <script type="text/javascript" src="{dbfx:make-web-url('/dhq/assets/xonomy-3.5.0/xonomy.js')}"></script>,
-        <script type="text/javascript" src="{dbfx:make-web-url('/dhq/assets/xonomy-biblio.js')}"></script>,
-        <link type="text/css" rel="stylesheet" href="{dbfx:make-web-url('/dhq/assets/xonomy-3.5.0/xonomy.css')}"></link>
+        <script src="{dbfx:make-web-url('/dhq/assets/xonomy-3.5.0/xonomy.js')}"></script>,
+        <script src="{dbfx:make-web-url('/dhq/assets/xonomy-biblio.js')}"></script>,
+        <link type="text/css" rel="stylesheet" href="{
+          dbfx:make-web-url('/dhq/assets/xonomy-3.5.0/xonomy.css')}"></link>
       )
     };
+  
+  (: The header to use for the Biblio Workbench site. :)
   declare variable $dbqx:header :=
     <header>
       <div class="biblio-qa-header">
-        <h1>
-          <a href="{dbfx:make-web-url('/dhq/biblio-qa')}">DHQ Biblio Workbench</a></h1>
+        <span class="h1 brand">
+          <a href="{dbfx:make-web-url('/dhq/biblio-qa')}">DHQ Biblio Workbench</a></span>
         {
           if ( session:get('id') ) then
-            <div>
+            <div class="user">
               <span class="greeting">Hello, { session:get('id') }!</span>
               <form action="{dbfx:make-web-url('/dhq/biblio-qa/logout')}" method="POST" class="logout">
                 <button type="submit">Log out</button>
@@ -86,30 +97,40 @@ xquery version "3.0";
       </div>
       <nav>
         <ul class="nav-menu">
-          <li class="nav-item">
-            <button id="nav-menu-records-label" name="nav-menu-records-label" class="tab"
-               type="button" aria-controls="nav-menu-records" aria-expanded="false">Biblio Records</button>
-            <ul id="nav-menu-records" class="sub-nav noshow"
-               aria-labelledby="nav-menu-records-label" aria-hidden="true">
-              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/records/list')}" class="button">All</a></li>
+          <li class="nav-item dropdown">
+            <button id="nav-menu-records-label" name="nav-menu-records-label" 
+               class="tab nav-link dropdown-toggle" data-bs-toggle="dropdown" 
+               type="button" aria-controls="nav-menu-records" aria-expanded="false"
+              >Biblio Records</button>
+            <ul id="nav-menu-records" class="dropdown-menu"
+               aria-labelledby="nav-menu-records-label">
+              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/records/list')}" 
+                class="dropdown-item">All</a></li>
               <!--<li><a href="#" class="button">In Progress</a></li>-->
             </ul>
           </li>
           <li class="nav-item">
-            <button id="nav-menu-articles-label" name="nav-menu-articles-label" class="tab"
-               type="button" aria-controls="nav-menu-articles" aria-expanded="false">DHQ Articles</button>
-            <ul id="nav-menu-articles" class="sub-nav noshow" 
-               aria-labelledby="nav-menu-articles-label" aria-hidden="true">
-              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list')}" class="button">All Articles</a></li>
-              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list/actionable')}" class="button">Actionable Articles</a></li>
+            <button id="nav-menu-articles-label" name="nav-menu-articles-label" 
+               class="tab nav-link dropdown-toggle" data-bs-toggle="dropdown" 
+               type="button" aria-controls="nav-menu-articles" aria-expanded="false"
+              >DHQ Articles</button>
+            <ul id="nav-menu-articles" class="dropdown-menu" 
+               aria-labelledby="nav-menu-articles-label">
+              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list')}" 
+                class="dropdown-item">All Articles</a></li>
+              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list/actionable')}" 
+                class="dropdown-item">Actionable Articles</a></li>
             </ul>
           </li>
           <li class="nav-item">
-            <button id="nav-menu-authorities-label" name="nav-menu-authorities-label" class="tab" 
-              type="button" aria-controls="nav-menu-authorities" aria-expanded="false">Authority Control</button>
-            <ul id="nav-menu-authorities" class="sub-nav noshow"
-               aria-labelledby="nav-menu-authorities-label" aria-hidden="true">
-              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/authority/publishers')}" class="button">Publishers</a></li>
+            <button id="nav-menu-authorities-label" name="nav-menu-authorities-label" 
+               class="tab nav-link dropdown-toggle" data-bs-toggle="dropdown" 
+               type="button" aria-controls="nav-menu-authorities" aria-expanded="false"
+              >Authority Control</button>
+            <ul id="nav-menu-authorities" class="dropdown-menu"
+               aria-labelledby="nav-menu-authorities-label">
+              <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/authority/publishers')}" 
+                class="dropdown-item">Publishers</a></li>
             </ul>
           </li>
         </ul>

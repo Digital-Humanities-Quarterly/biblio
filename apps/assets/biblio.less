@@ -199,15 +199,21 @@ h4 {
   background-color: @gray-opaque;
 }
 
+// Customize some of Bootstrap's CSS variables for the dropdown menus.
+.dropdown-menu {
+  --bs-dropdown-border-color: @gray;
+  --bs-dropdown-border-radius: 0;
+}
+
 header {
   margin: 0;
   border-bottom: 2px solid @gray;
   display: flex;
   align-items: flex-end;
+  gap: 0.5rem;
   justify-content: space-between;
   
   > .biblio-qa-header {
-    padding: 0 0.5em 0.25em 0;
     width: 100%;
     display: flex;
     align-items: flex-end;
@@ -264,13 +270,13 @@ header {
     } // & > .nav-menu
   } // header > nav
   
-  h1 {
-    margin: 0.25em 0 0;
+  .brand {
+    margin: 0.25em 0.25em 0;
     
     a {
       text-decoration: none;
     }
-  } // header h1
+  } // header .brand
   
   div {
     display: inline-flex;
