@@ -158,9 +158,14 @@ xquery version "3.0";
           }
         return dbqx:is-logged-in($perm, $redirect)
       else web:redirect('/dhq/biblio')
-  };
+  }; (: END permissions check on /dhq/biblio-qa :)
   
-  
+  (:~
+    Intercept POST requests to the Xonomy workbench when authentication is needed. 
+    This function redirects to the regular login page by default. If the POST 
+    request was issued through an AJAX request, a custom HTTP status code is used 
+    instead.
+   :)
   declare
     %rest:POST
     %rest:header-param('X-Requested-With', '{$requester}', '')
@@ -186,12 +191,14 @@ xquery version "3.0";
         web:redirect('/dhq/biblio')
       else
         dbqx:is-logged-in($perm, $errorFunction)
-  };
+  }; (: END permissions check on post /dhq/biblio-qa/workbench :)
 
 
 (:  RESTXQ FUNCTIONS  :)
   
-  
+  (:~
+    
+   :)
   declare
     %rest:GET
     %rest:path('/dhq/biblio-qa/login')
@@ -210,7 +217,7 @@ xquery version "3.0";
       else $dbqx:header
     return
       dbfx:make-xhtml($htmlBody, $header, 'Log in')
-  };
+  }; (: END /dhq/biblio-qa/login :)
   
   
   declare
@@ -228,7 +235,7 @@ xquery version "3.0";
     } catch * {
       web:redirect('/dhq/biblio-qa/login', map { 'redirect': $redirect-to })
     }
-  };
+  }; (: END post /dhq/biblio-qa/login :)
   
   
   declare
@@ -237,7 +244,7 @@ xquery version "3.0";
   function dbqx:logout() {
     session:delete('id'),
     web:redirect('/dhq/biblio-qa/login')
-  };
+  }; (: END post /dhq/biblio-qa/logout :)
   
   
   declare
