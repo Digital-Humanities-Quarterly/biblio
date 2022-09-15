@@ -158,7 +158,9 @@ xquery version "3.0";
           }
         return dbqx:is-logged-in($perm, $redirect)
       else web:redirect('/dhq/biblio')
-  }; (: END permissions check on /dhq/biblio-qa :)
+  };
+  (: END permissions check on /dhq/biblio-qa :)
+  
   
   (:~
     Intercept POST requests to the Xonomy workbench when authentication is needed. 
@@ -189,15 +191,17 @@ xquery version "3.0";
     return
       if ( not($dbqx:workbench-available) ) then
         web:redirect('/dhq/biblio')
-      else
-        dbqx:is-logged-in($perm, $errorFunction)
-  }; (: END permissions check on post /dhq/biblio-qa/workbench :)
+      else dbqx:is-logged-in($perm, $errorFunction)
+  };
+  (: END permissions check on post /dhq/biblio-qa/workbench :)
 
 
 (:  RESTXQ FUNCTIONS  :)
   
   (:~
-    
+    Display a form for authenticating a Workbench user. The page they originally 
+    tried to access is preserved in the `redirect` parameter. The user will be 
+    redirected there after a successful login.
    :)
   declare
     %rest:GET
@@ -217,9 +221,15 @@ xquery version "3.0";
       else $dbqx:header
     return
       dbfx:make-xhtml($htmlBody, $header, 'Log in')
-  }; (: END /dhq/biblio-qa/login :)
+  };
+  (: END /dhq/biblio-qa/login :)
   
   
+  (:~
+    Process an authentication request for the Workbench. If the login was successful, 
+    the user will be redirected to the page named in the `redirect` parameter. If 
+    the user could not log in, they are redirected back to the login form.
+   :)
   declare
     %rest:POST
     %rest:path('/dhq/biblio-qa/login')
@@ -235,45 +245,26 @@ xquery version "3.0";
     } catch * {
       web:redirect('/dhq/biblio-qa/login', map { 'redirect': $redirect-to })
     }
-  }; (: END post /dhq/biblio-qa/login :)
+  };
+  (: END post /dhq/biblio-qa/login :)
   
   
+  (:~
+    Process a user request to log out of the Workbench.
+   :)
   declare
     %rest:POST
     %rest:path('/dhq/biblio-qa/logout')
   function dbqx:logout() {
     session:delete('id'),
     web:redirect('/dhq/biblio-qa/login')
-  }; (: END post /dhq/biblio-qa/logout :)
-  
-  
-  declare
-    %rest:GET
-    %rest:path('/dhq/biblio-qa/index/title')
-    %output:method('html')
-  function dbqx:index-of-titles() {
-    let $interface :=
-      <main>
-        <div>
-          <p><a href="#">Test</a></p>
-        </div>
-        <div>
-          {
-            let $sortTitles := dbfx:get-fields-by-element(xs:NCName('title'))
-            let $sortFunction := dbfx:get-sortable-title(?)
-            return
-              dbfx:counts-to-table($sortTitles, $sortFunction)
-              (:for $distinct in dbfx:count-instances($sortTitles,$sortFunction)
-              return
-                <p>{ $distinct }</p>:)
-          }
-        </div>
-      </main>
-    return
-      dbfx:make-xhtml($interface, $dbqx:header)
   };
+  (: END post /dhq/biblio-qa/logout :)
   
   
+  (:~
+    The home page for the Biblio Workbench.
+   :)
   declare
     %rest:GET
     %rest:path('/dhq/biblio-qa')
@@ -285,55 +276,71 @@ xquery version "3.0";
     let $navbar := 
       <nav class="sidebar">
         <ul class="sidebar-component">
-          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/records/list')}">Biblio Records</a></li>
-          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list')}">DHQ Articles</a></li>
-          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/authority/publishers')}">Authority Control (Publishers)</a></li>
+          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/records/list')
+            }">Biblio Records</a></li>
+          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/articles/list')
+            }">DHQ Articles</a></li>
+          <li><a href="{dbfx:make-web-url('/dhq/biblio-qa/authority/publishers')
+            }">Authority Control (Publishers)</a></li>
         </ul>
       </nav>
+    let $entriesInProgressTable :=
+      if ( count($workingRecords) eq 0 ) then ()
+      else 
+        <table>
+          <tbody>{  
+            for $record in $workingRecords
+            let $id := $record/@ID/data(.)
+            order by $id
+            return
+              <tr>
+                <td>{ $record/base-uri() }</td>
+                <td class="cell-min cell-centered"><a href="{
+                   dbqx:make-web-url-to-record($id)}">Edit</a></td>
+              </tr>
+          }</tbody>
+        </table>
+    let $generatedSetsTable :=
+      if ( count($workingSets) eq 0 ) then ()
+      else 
+        <table>
+          <tbody>{  
+            for $set in $workingSets
+            let $dbPath := $set/base-uri()
+            let $setId := substring-before(tokenize($dbPath, '/')[last()], '.xml')
+            order by $setId
+            return
+              <tr>
+                <td>{ $dbPath }</td>
+                <td class="cell-min cell-centered"><a href="{
+                   dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$setId)
+                  }">Edit</a></td>
+              </tr>
+          }</tbody>
+        </table>
     let $interface := (
       $navbar,
       <main class="main-content">
+        <h1>Biblio Workbench</h1>
         <div>
           <p>There are { count($workingRecords) } Biblio entries in progress.</p>
-          <table>
-            <tbody>
-            {
-              for $record in $workingRecords
-              let $id := $record/@ID/data(.)
-              order by $id
-              return
-                <tr>
-                  <td>{ $record/base-uri() }</td>
-                  <td class="cell-min cell-centered"><a href="{dbqx:make-web-url-to-record($id)}">Edit</a></td>
-                </tr>
-            }
-            </tbody>
-          </table>
-        </div><br/>
+          { $entriesInProgressTable }
+        </div>
         <div>
-          <p>There are { count($workingSets) } sets of Biblio entries generated from DHQ articles.</p>
-          <table>
-            <tbody>
-            {
-              for $set in $workingSets
-              let $dbPath := $set/base-uri()
-              let $setId := substring-before(tokenize($dbPath, '/')[last()], '.xml')
-              order by $setId
-              return
-                <tr>
-                  <td>{ $dbPath }</td>
-                  <td class="cell-min cell-centered"><a href="{dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$setId)}">Edit</a></td>
-                </tr>
-            }
-            </tbody>
-          </table>
+          <p>There are { count($workingSets) } sets of Biblio entries generated from 
+            DHQ articles.</p>
+          { $generatedSetsTable }
         </div>
       </main>
     )
     return dbfx:make-xhtml($interface, $dbqx:header)
   };
+  (: END /dhq/biblio-qa :)
   
   
+  (:~
+    
+   :)
   declare
     %rest:GET
     %rest:path('/dhq/biblio-qa/articles/list')
@@ -368,9 +375,13 @@ xquery version "3.0";
         </main>
       </div>
     return dbfx:make-xhtml($interface, $dbqx:header)
-  }; (: END /dhq/biblio-qa/articles/list :)
+  };
+  (: END /dhq/biblio-qa/articles/list :)
   
   
+  (:~
+    
+   :)
   declare
     %rest:GET
     %rest:path('/dhq/biblio-qa/articles/list/actionable')
@@ -390,8 +401,12 @@ xquery version "3.0";
       </main>
     return dbfx:make-xhtml($interface, $dbqx:header)
   };
+  (: END /dhq/biblio-qa/articles/list/actionable :)
 
 
+  (:~
+    
+   :)
   declare
     %rest:GET
     %rest:path('/dhq/biblio-qa/articles/maintain')
@@ -433,8 +448,12 @@ xquery version "3.0";
       </main>
     return dbfx:make-xhtml($interface, $dbqx:header)
   };
+  (: END /dhq/biblio-qa/articles/maintain :)
   
   
+  (:~
+    
+   :)
   declare
     %rest:POST
     %rest:path('/dhq/biblio-qa/articles/maintain/update')
@@ -469,6 +488,7 @@ xquery version "3.0";
       }
     return mgmt:update-article-db-from-file-system($displayUpdates)
   };
+  (: END post /dhq/biblio-qa/articles/maintain/update :)
   
   
   declare
@@ -551,6 +571,37 @@ xquery version "3.0";
     return
       dbfx:make-xhtml($interface, $dbqx:header)
   };
+  
+  
+  (:~
+    
+   :)
+  declare
+    %rest:GET
+    %rest:path('/dhq/biblio-qa/index/title')
+    %output:method('html')
+  function dbqx:index-of-titles() {
+    let $interface :=
+      <main>
+        <div>
+          <p><a href="#">Test</a></p>
+        </div>
+        <div>
+          {
+            let $sortTitles := dbfx:get-fields-by-element(xs:NCName('title'))
+            let $sortFunction := dbfx:get-sortable-title(?)
+            return
+              dbfx:counts-to-table($sortTitles, $sortFunction)
+              (:for $distinct in dbfx:count-instances($sortTitles,$sortFunction)
+              return
+                <p>{ $distinct }</p>:)
+          }
+        </div>
+      </main>
+    return
+      dbfx:make-xhtml($interface, $dbqx:header)
+  };
+  (: END /dhq/biblio-qa/index/title :)
   
   
   (:~ 
