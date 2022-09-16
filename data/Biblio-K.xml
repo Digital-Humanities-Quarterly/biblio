@@ -883,7 +883,7 @@
          <date>2000</date>
       </publication>
    </ConferencePaper>
-   <JournalArticle ID="kashtan2011" issuance="monographic" provenance="jm2014">
+   <JournalArticle dhqID="000101" ID="kashtan2011" issuance="monographic" provenance="jm2014">
       <author>
          <givenName>Aaron</givenName>
          <familyName>Kashtan</familyName>
@@ -4633,7 +4633,7 @@
          <date>2002</date>
       </journal>
    </JournalArticle>
-   <JournalArticle ID="kraus2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000069" ID="kraus2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Kari</givenName>
          <familyName>Kraus</familyName>

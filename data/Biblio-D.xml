@@ -4205,7 +4205,7 @@
       <startingPage>39</startingPage>
       <endingPage>55</endingPage>
    </JournalArticle>
-   <JournalArticle ID="drucker2009a" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000048" ID="drucker2009a" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Johanna</givenName>
          <familyName>Drucker</familyName>
@@ -4424,7 +4424,7 @@
       </journal>
       <url>http://chs.harvard.edu/chs/files/classics_issue3_due.pdf</url>
    </JournalArticle>
-   <JournalArticle ID="due2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000029" ID="due2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Casey</givenName>
          <familyName>Dué</familyName>
@@ -4592,7 +4592,7 @@
       </journal>
       <note>http://www.dlib.org/dlib/january08/dunn/01dunn.html</note>
    </JournalArticle>
-   <JournalArticle ID="dunn2009a" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000079" ID="dunn2009a" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Stuart</givenName>
          <familyName>Dunn</familyName>

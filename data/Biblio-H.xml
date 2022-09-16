@@ -3159,7 +3159,7 @@
       <startingPage>285</startingPage>
       <endingPage>295</endingPage>
    </ConferencePaper>
-   <JournalArticle ID="hedges2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000078" ID="hedges2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Mark</givenName>
          <familyName>Hedges</familyName>

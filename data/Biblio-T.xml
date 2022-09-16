@@ -875,7 +875,7 @@
          <date>2006</date>
       </journal>
    </JournalArticle>
-   <JournalArticle ID="terras2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000070" ID="terras2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Melissa M.</givenName>
          <familyName>Terras</familyName>

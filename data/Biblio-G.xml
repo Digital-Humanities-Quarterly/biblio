@@ -2315,7 +2315,7 @@
       <url>http://www.dlib.org/dlib/september07/gold/09gold-pt2.html</url>
       <note>export DHQ_citation</note>
    </JournalArticle>
-   <JournalArticle ID="gold2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000072" ID="gold2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Nicolas</givenName>
          <familyName>Gold</familyName>

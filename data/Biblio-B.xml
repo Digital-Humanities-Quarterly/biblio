@@ -5956,7 +5956,7 @@
       <startingPage>23</startingPage>
       <endingPage>32</endingPage>
    </JournalArticle>
-   <JournalArticle ID="blackwell2009a" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000024" ID="blackwell2009a" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Christopher</givenName>
          <familyName>Blackwell</familyName>
@@ -5973,7 +5973,7 @@
          <date>2009</date>
       </journal>
    </JournalArticle>
-   <JournalArticle ID="blackwell2009b" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000035" ID="blackwell2009b" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Christopher</givenName>
          <familyName>Blackwell</familyName>
@@ -7938,7 +7938,7 @@
       <startingPage>269</startingPage>
       <endingPage>277</endingPage>
    </ConferencePaper>
-   <JournalArticle ID="borgman2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000077" ID="borgman2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Christine L.</givenName>
          <familyName>Borgman</familyName>
@@ -10207,7 +10207,7 @@
       <startingPage>127</startingPage>
       <endingPage>134</endingPage>
    </JournalArticle>
-   <JournalArticle ID="brown2009a" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000040" ID="brown2009a" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Susan</givenName>
          <familyName>Brown</familyName>
@@ -11160,7 +11160,7 @@
       <startingPage>61</startingPage>
       <endingPage>85</endingPage>
    </BookSection>
-   <JournalArticle ID="burgess2013" issuance="monographic" provenance="jm2014">
+   <JournalArticle dhqID="000102" ID="burgess2013" issuance="monographic" provenance="jm2014">
       <author>
          <givenName>Helen J.</givenName>
          <familyName>Burgess</familyName>

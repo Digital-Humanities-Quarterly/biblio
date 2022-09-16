@@ -2273,7 +2273,7 @@
       <publisher>MIT Press</publisher>
       <date>2000</date>
    </Book>
-   <JournalArticle ID="piccini2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000076" ID="piccini2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Angela</givenName>
          <familyName>Piccini</familyName>

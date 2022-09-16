@@ -1067,7 +1067,7 @@
       <additionalTitle>Southern Spaces</additionalTitle>
       <url>www.southernspaces.org/2012/conversation-digital-historians</url>
    </WebSite>
-   <JournalArticle ID="nelson2012d" issuance="monographic" provenance="jm2014">
+   <JournalArticle dhqID="000137" ID="nelson2012d" issuance="monographic" provenance="jm2014">
       <author>
          <givenName>Brent</givenName>
          <familyName>Nelson</familyName>

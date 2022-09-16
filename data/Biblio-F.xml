@@ -1176,7 +1176,7 @@
          <date>2009</date>
       </book>
    </BookSection>
-   <JournalArticle ID="finkel2009b" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000032" ID="finkel2009b" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Raphael</givenName>
          <familyName>Finkel</familyName>

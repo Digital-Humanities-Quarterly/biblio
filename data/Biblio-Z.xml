@@ -696,7 +696,7 @@
       <startingPage>241</startingPage>
       <endingPage>253</endingPage>
    </JournalArticle>
-   <JournalArticle ID="zöllner-weber2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000068" ID="zöllner-weber2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Amélie</givenName>
          <familyName>Zöllner-Weber</familyName>

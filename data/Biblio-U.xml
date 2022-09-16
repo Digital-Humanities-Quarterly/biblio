@@ -461,7 +461,7 @@
       </conference>
       <url>http://people.brandeis.edu/~unsworth/dhcs.html</url>
    </ConferencePaper>
-   <JournalArticle ID="unsworth2009" issuance="monographic" provenance="jm2014">
+   <JournalArticle dhqID="000073" ID="unsworth2009" issuance="monographic" provenance="jm2014">
       <author>
          <givenName>J.</givenName>
          <familyName>Unsworth</familyName>

@@ -460,7 +460,7 @@
       <startingPage>341</startingPage>
       <endingPage>350</endingPage>
    </JournalArticle>
-   <JournalArticle ID="raben2007ba" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000008" ID="raben2007ba" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Joseph</givenName>
          <familyName>Raben</familyName>
@@ -5062,7 +5062,7 @@
       <publisher>Chandos Publishing</publisher>
       <date>2006</date>
    </Book>
-   <JournalArticle ID="rydberg2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000027" ID="rydberg2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Jeffrey A.</givenName>
          <familyName>Rydberg-Cox</familyName>

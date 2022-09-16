@@ -720,7 +720,7 @@
       <publisher>Oxford University Press</publisher>
       <date>2011</date>
    </Book>
-   <JournalArticle ID="saiso2007" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000014" ID="saiso2007" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Ernesto Priani</givenName>
          <familyName>Saisó</familyName>
@@ -4621,7 +4621,7 @@
       <endingPage>98</endingPage>
       <url>http://texttechnology.mcmaster.ca/pdf/vol14_1_09.pdf</url>
    </JournalArticle>
-   <JournalArticle ID="siemens2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000075" ID="siemens2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Ray</givenName>
          <familyName>Siemens</familyName>
@@ -6838,7 +6838,7 @@
          <date>2004</date>
       </book>
    </BookSection>
-   <JournalArticle ID="sporton2009" issuance="monographic" provenance="legacy">
+   <JournalArticle dhqID="000074" ID="sporton2009" issuance="monographic" provenance="legacy">
       <author>
          <givenName>Gregory</givenName>
          <familyName>Sporton</familyName>
@@ -8932,7 +8932,7 @@
       <publisher>Norstedts</publisher>
       <date>2008</date>
    </Book>
-   <JournalArticle ID="svensson2009" issuance="monographic" provenance="dn2018">
+   <JournalArticle dhqID="000065" ID="svensson2009" issuance="monographic" provenance="dn2018">
       <author>
          <givenName>Patrik</givenName>
          <familyName>Svensson</familyName>
@@ -8946,7 +8946,7 @@
          <date>2009</date>
       </journal>
    </JournalArticle>
-   <JournalArticle ID="svensson2011a" issuance="monographic" provenance="jm2014">
+   <JournalArticle dhqID="000090" ID="svensson2011a" issuance="monographic" provenance="jm2014">
       <author>
          <givenName>Patrik</givenName>
          <familyName>Svensson</familyName>
@@ -8993,7 +8993,7 @@
       <startingPage>36</startingPage>
       <endingPage>49</endingPage>
    </BookSection>
-   <JournalArticle ID="svensson2012b" issuance="monographic" provenance="jm2014">
+   <JournalArticle dhqID="000112" ID="svensson2012b" issuance="monographic" provenance="jm2014">
       <author>
          <givenName>Patrik</givenName>
          <familyName>Svensson</familyName>
