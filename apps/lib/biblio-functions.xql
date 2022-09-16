@@ -446,50 +446,57 @@ module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib";
 
   declare function dbfx:article-map($article as node()?) as map(xs:string, item()*)? {
     if ( empty($article) ) then ()
-    else map {
-        'id' : function() {
-            $article//tei:publicationStmt/tei:idno[@type eq 'DHQarticle-id']/normalize-space(.)
-          },
-        'volume': function() {
-            let $vol := 
-              $article//tei:publicationStmt/tei:idno[@type eq 'volume']/normalize-space(.)
-            return
-              try {
-                replace($vol, '^0+', '') => xs:integer()
-              } catch err:FORG0001 { () }
-          },
-        'issue': function() {
-            let $issue :=
-              $article//tei:publicationStmt/tei:idno[@type eq 'issue']/normalize-space(.)
-            return
-              try { xs:integer($issue) } catch err:FORG0001 { () }
-          },
-        'path' : $article/base-uri() cast as xs:string,
-        'title' : function() as xs:string {
-            $article//tei:titleStmt/tei:title[1]/normalize-space(.)
-          },
-        'authors' : function() as array(xs:string*) {
-            array { $article//dhq:author_name/dhq:family/normalize-space(.) }
-          },
-        'bibls' : function() as map(xs:string, item()*) {
-            let $allBibls := $article//tei:text//tei:bibl[parent::tei:listBibl]
-            let $total := map:entry('total', count($allBibls))
-            let $keyStatusGroups :=
-              for $bibl in $allBibls
-              group by $isKeyed := dbfx:has-valid-key($bibl)
-              let $mapKey := if ( $isKeyed ) then 'keyed' else 'nokey'
-              return
-                map:entry($mapKey,
-                          for $match in $bibl return $match)
-            return
-              map:merge( ($total, $keyStatusGroups) )
+    else 
+      let $id := 
+        $article//tei:publicationStmt/tei:idno[@type eq 'DHQarticle-id']/normalize-space(.)
+      return
+        if ( not(exists($id)) or $id eq '' ) then ()
+        else map {
+            'id' : $id,
+            'volume': function() {
+                let $vol := 
+                  $article//tei:publicationStmt/tei:idno[@type eq 'volume']/normalize-space(.)
+                return
+                  try {
+                    replace($vol, '^0+', '') => xs:integer()
+                  } catch err:FORG0001 { () }
+              },
+            'issue': function() {
+                let $issue :=
+                  $article//tei:publicationStmt/tei:idno[@type eq 'issue']/normalize-space(.)
+                return
+                  try { xs:integer($issue) } catch err:FORG0001 { () }
+              },
+            'pubDate': function() as xs:string? {
+                $article//tei:publicationStmt/tei:date/@when/data(.)
+              },
+            'path' : $article/base-uri() cast as xs:string,
+            'title' : function() as xs:string {
+                $article//tei:titleStmt/tei:title[1]/normalize-space(.)
+              },
+            'authors' : function() as array(xs:string*) {
+                array { $article//dhq:author_name/dhq:family/normalize-space(.) }
+              },
+            'bibls' : function() as map(xs:string, item()*) {
+                let $allBibls := $article//tei:text//tei:bibl[parent::tei:listBibl]
+                let $total := map:entry('total', count($allBibls))
+                let $keyStatusGroups :=
+                  for $bibl in $allBibls
+                  group by $isKeyed := dbfx:has-valid-key($bibl)
+                  let $mapKey := if ( $isKeyed ) then 'keyed' else 'nokey'
+                  return
+                    map:entry($mapKey,
+                              for $match in $bibl return $match)
+                return
+                  map:merge( ($total, $keyStatusGroups) )
+              }
           }
-      }
   };
   
   
   declare function dbfx:article-set() as map(xs:string, item()*)* {
     for $article in db:open($dbfx:db-articles)
+    order by $article/base-uri()
     return dbfx:article-map($article)
   };
   

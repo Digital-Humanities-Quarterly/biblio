@@ -1585,8 +1585,8 @@ xquery version "3.0";
       <tbody>
       {
         for $article in $articles
-        let $id := $article?id()
-        let $setExists := exists(dbqx:get-biblio-set($article?id()))
+        let $id := $article?id
+        let $setExists := exists(dbqx:get-biblio-set($article?id))
         let $volIssue := 
           if ( empty($article?volume()) ) then ()
           else concat($article?volume(),'.',$article?issue())
@@ -1599,7 +1599,7 @@ xquery version "3.0";
             "Not yet available"
           else
             <a href="{
-               dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$article?id())}">{
+               dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$article?id)}">{
               if ( $setExists ) then "Edit" else "Preview"
             }</a>
         return
