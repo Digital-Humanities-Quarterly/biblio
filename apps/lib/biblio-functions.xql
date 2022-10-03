@@ -479,16 +479,31 @@ module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib";
               },
             'bibls' : function() as map(xs:string, item()*) {
                 let $allBibls := $article//tei:text//tei:bibl[parent::tei:listBibl]
+                let $allPtrTargets := $article//tei:text//tei:ptr/@target[starts-with(., '#')]
+                  /substring-after(., '#')
                 let $total := map:entry('total', count($allBibls))
                 let $keyStatusGroups :=
                   for $bibl in $allBibls
                   group by $isKeyed := dbfx:has-valid-key($bibl)
                   let $mapKey := if ( $isKeyed ) then 'keyed' else 'nokey'
+                  let $biblsOfType :=
+                    for $match in $bibl
+                    let $xmlId := $match/@xml:id/data(.)
+                    return map {
+                        'references': count($allPtrTargets[. = $xmlId]),
+                        'biblioId': $match/@key/data(.),
+                        'xmlId': $xmlId
+                      }
                   return
-                    map:entry($mapKey,
-                              for $match in $bibl return $match)
+                    map:entry($mapKey, array { $biblsOfType })
                 return
                   map:merge( ($total, $keyStatusGroups) )
+              },
+            'abstract': function() {
+                $article//dhq:abstract[1] => normalize-space()
+              },
+            'teaser': function() {
+                ($article//dhq:teaser)[1] => normalize-space()
               }
           }
   };
