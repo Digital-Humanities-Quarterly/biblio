@@ -23,7 +23,7 @@ xquery version "3.1";
 (:  VARIABLES  :)
   
   declare variable $save-to-directory external := 
-    'file:///Users/aclark/Documents/DHQ/';
+    'file:///Users/aclark/Documents/DHQ/biblio-data/';
 
 (:  FUNCTIONS  :)
   
@@ -43,21 +43,24 @@ xquery version "3.1";
 let $biblioEntries := dbfx:bibliographic-records()
 let $biblioTSV :=
   let $headerRow := (
-      'Biblio ID', 'Pub. Year', 'Contributors', 'Title', 'Genre', 'Macro Title'
+      'Biblio ID', 'Pub. Date', 'Contributors', 'Title', 'Genre', 'Macro Title'
     )
   let $biblioRows :=
     for $entry in $biblioEntries
     let $id := $entry/@ID/data(.)
-    let $year := ($entry//dbib:date)[1]
+    let $date := ($entry//dbib:date, '')[1]
     let $authors :=
       let $names :=
         for $contributor in $entry/(dbib:author | dbib:translator | dbib:editor)
         return ($contributor/(dbib:familyName, dbib:corporateName))[1]
-      return string-join($names, ' | ')
+      return 
+        if ( exists($names) ) then
+          string-join($names, ' | ')
+        else ''
     let $title := $entry/dbib:title/normalize-space()
     let $genre := $entry/local-name()
     let $macroEntity := ($entry/*/dbib:title/normalize-space(), '')[1]
-    let $cells := ( $id, $year, $authors, $title, $genre, $macroEntity )
+    let $cells := ( $id, $date, $authors, $title, $genre, $macroEntity )
     order by lower-case($id)
     return local:make-row($cells)
   return local:make-tsv('dhq-biblio-entries.tsv', $headerRow, $biblioRows)
@@ -89,7 +92,7 @@ let $articleTSV :=
     return local:make-row($cells)
   return local:make-tsv('dhq-articles.tsv', $headerRow, $articleRows)
 let $citationTSV :=
-  let $headerRow := ( "DHQ Article ID", "Biblio Entry ID", "# of References" )
+  let $headerRow := ( "DHQ Article ID", "Biblio Key", "# of References" )
   let $citationRows :=
     for $article in $articleSet
     let $keyedBibls := $article?bibls()?keyed?*
