@@ -1602,12 +1602,17 @@ xquery version "3.0";
                dbfx:make-web-url('/dhq/biblio-qa/workbench/set/'||$article?id)}">{
               if ( $setExists ) then "Edit" else "Preview"
             }</a>
+        let $bibls := $article?bibls()
         return
           <tr>
             <td class="cell-min cell-centered">{ $volIssue }</td>
             <td class="cell-min cell-centered">{ $id }</td>
             <td>{ $article?title() }</td>
-            <td class="cell-min cell-centered">{ count($article?bibls()?nokey) }</td>
+            <td class="cell-min cell-centered">{ 
+              if ( map:contains($bibls, 'nokey') ) then
+                array:size($bibls?nokey)
+              else 0
+            }</td>
             <td class="cell-min cell-centered">{ $article?bibls()?total }</td>
             <td class="cell-min cell-centered">{ $biblioSet }</td>
           </tr>
