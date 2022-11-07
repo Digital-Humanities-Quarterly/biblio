@@ -67,12 +67,23 @@ let $biblioTSV :=
 let $articleSet := dbfx:article-set()[?pubDate()[exists(.) and . ne '']]
 let $articleTSV :=
   let $headerRow := (
-      'Article ID', 'Pub. Year', 'Volume and Issue', 'Authors', 'Title', 'Teaser', '# of Cited Works' 
+      'Article ID', 'Pub. Year', 'Volume and Issue', 'Authors', 'Affiliations', 
+      'Title', (:'Teaser',:) 'Abstract', '# of Cited Works' 
     )
   let $articleRows :=
     for $articleMap in $articleSet
     let $id := ($articleMap?id, '')[1]
-    let $authors := string-join($articleMap?authors(), " | ")
+    let $authors := string-join($articleMap?authors()?*?name, " | ")
+    let $affiliations := 
+      let $strSeq :=
+        for $autMap in $articleMap?authors()?*
+        let $affiliation := $autMap?affiliation
+        return
+          if ( empty($affiliation) ) then '' 
+          else if ( count($affiliation) gt 1 ) then
+            string-join($affiliation, '; ')
+          else $affiliation
+      return string-join($strSeq, " | ")
     let $title := ($articleMap?title(), '')[1]
     let $volume := $articleMap?volume()
     let $issue := $articleMap?issue()
@@ -86,8 +97,11 @@ let $articleTSV :=
         if ( empty($date) ) then ''
         else substring($date, 1, 4)
     let $teaser := $articleMap?teaser()
+    let $abstract := $articleMap?abstract()
     let $numCited := $articleMap?bibls()?total cast as xs:string
-    let $cells := ($id, $year, $volIssue, $authors, $title, $teaser, $numCited)
+    let $cells := (
+        $id, $year, $volIssue, $authors, $affiliations, $title, (:$teaser,:) $abstract, $numCited
+      )
     order by $volume, $issue
     return local:make-row($cells)
   return local:make-tsv('dhq-articles.tsv', $headerRow, $articleRows)

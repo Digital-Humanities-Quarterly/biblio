@@ -474,8 +474,16 @@ module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib";
             'title' : function() as xs:string {
                 $article//tei:titleStmt/tei:title[1]/normalize-space(.)
               },
-            'authors' : function() as array(xs:string*) {
-                array { $article//dhq:author_name/dhq:family/normalize-space(.) }
+            'authors' : function() as array(map(xs:string, item()*)) {
+                let $authorMaps :=
+                  for $autInfo in $article//dhq:authorInfo
+                  let $name := $autInfo/dhq:author_name/normalize-space(.)
+                  let $affiliation := $autInfo/dhq:affiliation/normalize-space(.)
+                  return map {
+                      'name': $name,
+                      'affiliation': $affiliation
+                    }
+                return array { $authorMaps }
               },
             'bibls' : function() as map(xs:string, item()*) {
                 let $allBibls := $article//tei:text//tei:bibl[parent::tei:listBibl]
@@ -500,7 +508,7 @@ module namespace dbfx="http://digitalhumanities.org/dhq/ns/biblio/lib";
                   map:merge( ($total, $keyStatusGroups) )
               },
             'abstract': function() {
-                $article//dhq:abstract[1] => normalize-space()
+                ($article//dhq:abstract)[1] => normalize-space()
               },
             'teaser': function() {
                 ($article//dhq:teaser)[1] => normalize-space()
